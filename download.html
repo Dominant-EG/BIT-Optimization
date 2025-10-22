@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载文件 - 文件共享服务</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📥 下载文件</h1>
+            <a href="index.html" class="back-btn">← 返回首页</a>
+        </header>
+        
+        <main>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索文件...">
+            </div>
+            
+            <div class="file-list">
+                <div class="file-item">
+                    <div class="file-info">
+                        <h4>示例文件.pdf</h4>
+                        <p class="file-desc">这是一个示例文件</p>
+                        <span class="file-size">2.3 MB</span>
+                    </div>
+                    <a href="#" class="download-btn" target="_blank">下载</a>
+                </div>
+                <!-- 更多文件会通过 JavaScript 动态加载 -->
+            </div>
+            
+            <div id="noFiles" class="no-files" style="display: none;">
+                <p>暂无文件，<a href="upload.html">去上传第一个文件</a></p>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/script.js"></script>
+</body>
+</html>
