@@ -3,35 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件共享服务</title>
+    <title>文件资源库 - 在线浏览和下载</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📁 文件共享平台</h1>
-            <p>简单、快捷的文件上传下载服务</p>
+            <h1>📚 文件资源库</h1>
+            <p>欢迎浏览和下载共享文件资源</p>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索文件或文件夹...">
+            </div>
         </header>
-        
+
         <main>
-            <div class="card-grid">
-                <div class="card">
-                    <h2>📤 上传文件</h2>
-                    <p>将您的文件上传到云存储</p>
-                    <a href="upload.html" class="btn">去上传</a>
+            <!-- 文件统计 -->
+            <div class="stats">
+                <span>📁 <span id="folderCount">0</span> 个文件夹</span>
+                <span>📄 <span id="fileCount">0</span> 个文件</span>
+            </div>
+
+            <!-- 文件浏览区域 -->
+            <div class="file-browser">
+                <div class="breadcrumb">
+                    <span class="crumb" data-path="">首页</span>
                 </div>
                 
-                <div class="card">
-                    <h2>📥 下载文件</h2>
-                    <p>浏览和下载共享文件</p>
-                    <a href="download.html" class="btn">去下载</a>
+                <div class="content-area">
+                    <!-- 文件夹列表 -->
+                    <div class="folders-section">
+                        <h3>📁 文件夹</h3>
+                        <div class="folders-grid" id="foldersContainer">
+                            <!-- 文件夹会在这里动态生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 文件列表 -->
+                    <div class="files-section">
+                        <h3>📄 文件</h3>
+                        <div class="files-grid" id="filesContainer">
+                            <!-- 文件会在这里动态生成 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
-        
+
         <footer>
-            <p>Powered by GitHub Pages</p>
+            <p>© 2024 文件资源库 - 仅限浏览和下载</p>
         </footer>
     </div>
+
+    <!-- 文件预览模态框 -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalBody">
+                <!-- 预览内容 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
