@@ -3,42 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>上传文件 - 文件共享服务</title>
+    <title>直接上传 - 文件共享服务</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📤 上传文件</h1>
+            <h1>📤 直接上传文件到 GitHub</h1>
             <a href="index.html" class="back-btn">← 返回首页</a>
         </header>
         
         <main>
             <div class="upload-area">
-                <h3>方法一：使用免费云存储</h3>
-                <div class="storage-options">
-                    <div class="option">
-                        <h4>Google Drive</h4>
-                        <p>1. 访问 <a href="https://drive.google.com" target="_blank">Google Drive</a></p>
-                        <p>2. 上传你的文件</p>
-                        <p>3. 获取分享链接，粘贴到下方</p>
-                    </div>
-                    
-                    <div class="option">
-                        <h4>腾讯微云</h4>
-                        <p>1. 访问 <a href="https://www.weiyun.com" target="_blank">微云</a></p>
-                        <p>2. 上传文件并分享</p>
-                        <p>3. 复制下载链接</p>
+                <!-- 方法1：手动上传到 GitHub -->
+                <div class="upload-method">
+                    <h3>方法一：通过 GitHub 网页上传</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <span class="step-number">1</span>
+                            <p>点击下方按钮打开 GitHub 仓库</p>
+                            <a href="https://github.com/你的用户名/file-sharing-website/upload/main/files" 
+                               class="btn" target="_blank">打开 GitHub 上传页面</a>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">2</span>
+                            <p>拖拽文件到上传区域，或点击"choose your files"</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">3</span>
+                            <p>在提交描述中填写文件信息，点击"Commit changes"</p>
+                        </div>
+                        <div class="step">
+                            <span class="step-number">4</span>
+                            <p>回到下载页面刷新，就能看到新文件了</p>
+                        </div>
                     </div>
                 </div>
-                
+
+                <!-- 方法2：记录已上传文件 -->
                 <div class="link-form">
-                    <h4>提交文件链接</h4>
-                    <form id="uploadForm">
-                        <input type="text" id="fileName" placeholder="文件名称" required>
-                        <input type="url" id="fileUrl" placeholder="文件下载链接" required>
+                    <h3>记录已上传的文件</h3>
+                    <p>如果你已经在 GitHub 上传了文件，在这里记录文件信息：</p>
+                    <form id="fileRecordForm">
+                        <input type="text" id="fileName" placeholder="文件名称（含后缀）" required>
+                        <input type="text" id="filePath" placeholder="文件在仓库中的路径，如：files/文档.pdf" required>
                         <textarea id="fileDescription" placeholder="文件描述（可选）"></textarea>
-                        <button type="submit">提交文件</button>
+                        <button type="submit">记录文件</button>
                     </form>
                 </div>
             </div>
