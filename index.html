@@ -3,68 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件资源库 - 在线浏览和下载</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>北理最优化方法代码作业</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .github-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+        
+        .github-info i {
+            margin-right: 8px;
+        }
+        
+        .file-browser {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .browser-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .path {
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 8px 15px 8px 35px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+        
+        .file-list {
+            padding: 10px 0;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .matlab {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .txt {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .image {
+            background: #e91e63;
+            color: white;
+        }
+        
+        .pdf {
+            background: #f44336;
+            color: white;
+        }
+        
+        .word {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .folder {
+            background: #ffc107;
+            color: white;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .file-meta {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-preview {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-download {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90%;
+            overflow: auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .preview-body {
+            margin-top: 20px;
+        }
+        
+        .preview-image {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .preview-code {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .sync-status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .sync-status i {
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .github-info {
+                width: 100%;
+            }
+            
+            .browser-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📚 文件资源库</h1>
-            <p>欢迎浏览和下载共享文件资源</p>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索文件或文件夹...">
+            <div class="header-content">
+                <div>
+                    <h1>北理最优化方法代码作业</h1>
+                    <p class="subtitle">北京理工大学最优化方法课程相关代码与文档资源</p>
+                </div>
+                <div class="github-info">
+                    <i class="fab fa-github"></i>
+                    <span>自动同步 GitHub 仓库</span>
+                </div>
             </div>
         </header>
-
-        <main>
-            <!-- 文件统计 -->
-            <div class="stats">
-                <span>📁 <span id="folderCount">0</span> 个文件夹</span>
-                <span>📄 <span id="fileCount">0</span> 个文件</span>
+        
+        <div class="file-browser">
+            <div class="browser-header">
+                <div class="path">
+                    <i class="fas fa-folder"></i> 北理最优化方法代码作业
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索文件...">
+                </div>
             </div>
-
-            <!-- 文件浏览区域 -->
-            <div class="file-browser">
-                <div class="breadcrumb">
-                    <span class="crumb" data-path="">首页</span>
+            
+            <div class="file-list">
+                <!-- 文件夹示例 -->
+                <div class="file-item">
+                    <div class="file-icon folder">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">第一章 线性规划</div>
+                        <div class="file-meta">文件夹 • 5个文件</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview"><i class="fas fa-eye"></i> 打开</button>
+                    </div>
                 </div>
                 
-                <div class="content-area">
-                    <!-- 文件夹列表 -->
-                    <div class="folders-section">
-                        <h3>📁 文件夹</h3>
-                        <div class="folders-grid" id="foldersContainer">
-                            <!-- 文件夹会在这里动态生成 -->
-                        </div>
+                <!-- MATLAB文件示例 -->
+                <div class="file-item">
+                    <div class="file-icon matlab">
+                        <i class="fas fa-code"></i>
                     </div>
-
-                    <!-- 文件列表 -->
-                    <div class="files-section">
-                        <h3>📄 文件</h3>
-                        <div class="files-grid" id="filesContainer">
-                            <!-- 文件会在这里动态生成 -->
-                        </div>
+                    <div class="file-info">
+                        <div class="file-name">simplex_method.m</div>
+                        <div class="file-meta">MATLAB代码 • 2.3 KB • 2023-10-15更新</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview" onclick="previewFile('matlab')"><i class="fas fa-eye"></i> 预览</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
+                    </div>
+                </div>
+                
+                <!-- 文本文件示例 -->
+                <div class="file-item">
+                    <div class="file-icon txt">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">实验报告.txt</div>
+                        <div class="file-meta">文本文件 • 1.1 KB • 2023-10-10更新</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview" onclick="previewFile('txt')"><i class="fas fa-eye"></i> 预览</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
+                    </div>
+                </div>
+                
+                <!-- 图片文件示例 -->
+                <div class="file-item">
+                    <div class="file-icon image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">算法流程图.png</div>
+                        <div class="file-meta">图片 • 156 KB • 2023-10-08更新</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview" onclick="previewFile('image')"><i class="fas fa-eye"></i> 预览</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
+                    </div>
+                </div>
+                
+                <!-- PDF文件示例 -->
+                <div class="file-item">
+                    <div class="file-icon pdf">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">最优化方法讲义.pdf</div>
+                        <div class="file-meta">PDF文档 • 3.5 MB • 2023-10-05更新</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview" onclick="previewFile('pdf')"><i class="fas fa-eye"></i> 预览</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
+                    </div>
+                </div>
+                
+                <!-- Word文档示例 -->
+                <div class="file-item">
+                    <div class="file-icon word">
+                        <i class="fas fa-file-word"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">作业要求.docx</div>
+                        <div class="file-meta">Word文档 • 256 KB • 2023-10-01更新</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-preview" onclick="previewFile('word')"><i class="fas fa-eye"></i> 预览</button>
+                        <button class="btn btn-download"><i class="fas fa-download"></i> 下载</button>
                     </div>
                 </div>
             </div>
-        </main>
-
-        <footer>
-            <p>© 2024 文件资源库 - 仅限浏览和下载</p>
-        </footer>
+        </div>
+        
+        <div class="sync-status">
+            <i class="fas fa-sync-alt"></i> 最后同步: 2023-10-20 14:30:25 • 下次同步: <span id="countdown">59</span>秒后
+        </div>
     </div>
-
+    
     <!-- 文件预览模态框 -->
-    <div id="previewModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="modalBody">
-                <!-- 预览内容 -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <span class="close-btn" onclick="closePreview()">&times;</span>
+            <h3 id="preview-title">文件预览</h3>
+            <div class="preview-body" id="preview-body">
+                <!-- 预览内容将动态加载 -->
             </div>
         </div>
     </div>
 
-    <script src="js/data.js"></script>
-    <script src="js/script.js"></script>
+    <script>
+        // 模拟GitHub同步倒计时
+        let countdown = 59;
+        const countdownElement = document.getElementById('countdown');
+        
+        function updateCountdown() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                countdown = 60;
+                // 这里可以添加实际的同步逻辑
+                alert('已从GitHub仓库同步最新文件！');
+            }
+        }
+        
+        setInterval(updateCountdown, 1000);
+        
+        // 文件预览功能
+        function previewFile(type) {
+            const modal = document.getElementById('previewModal');
+            const title = document.getElementById('preview-title');
+            const body = document.getElementById('preview-body');
+            
+            modal.style.display = 'flex';
+            
+            switch(type) {
+                case 'matlab':
+                    title.textContent = 'simplex_method.m - 预览';
+                    body.innerHTML = `
+                        <div class="preview-code">
+                            <pre>function [x, fval, exitflag] = simplex_method(c, A, b)
+% 单纯形法求解线性规划问题
+% 输入: c - 目标函数系数向量
+%       A - 约束条件系数矩阵
+%       b - 约束条件右侧向量
+% 输出: x - 最优解
+%       fval - 最优值
+%       exitflag - 退出标志
+
+[m, n] = size(A);
+% 添加松弛变量
+A = [A, eye(m)];
+c = [c; zeros(m, 1)];
+
+% 构造初始单纯形表
+tab = [A, b; c', 0];
+
+% 迭代过程
+while any(tab(end, 1:end-1) < 0)
+    % 选择进基变量
+    [~, pivot_col] = min(tab(end, 1:end-1));
+    
+    % 计算比值
+    ratios = tab(1:end-1, end) ./ tab(1:end-1, pivot_col);
+    ratios(ratios <= 0) = Inf;
+    
+    % 选择出基变量
+    [~, pivot_row] = min(ratios);
+    
+    % 主元归一化
+    tab(pivot_row, :) = tab(pivot_row, :) / tab(pivot_row, pivot_col);
+    
+    % 高斯消元
+    for i = 1:size(tab, 1)
+        if i ~= pivot_row
+            tab(i, :) = tab(i, :) - tab(i, pivot_col) * tab(pivot_row, :);
+        end
+    end
+end
+
+% 提取结果
+x = zeros(n, 1);
+for i = 1:n
+    col = tab(1:end-1, i);
+    if sum(col == 1) == 1 && sum(col == 0) == m-1
+        x(i) = tab(find(col == 1), end);
+    end
+end
+
+fval = -tab(end, end);
+exitflag = 1;
+end</pre>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'txt':
+                    title.textContent = '实验报告.txt - 预览';
+                    body.innerHTML = `
+                        <div class="preview-code">
+                            <pre>北理最优化方法实验报告
+
+实验名称：单纯形法实现线性规划问题求解
+实验日期：2023年10月10日
+学生姓名：张三
+学号：2023001001
+
+一、实验目的
+1. 理解单纯形法的基本原理
+2. 掌握单纯形法的计算步骤
+3. 实现单纯形法求解线性规划问题
+
+二、实验内容
+使用MATLAB编程实现单纯形法，并求解以下线性规划问题：
+max z = 3x1 + 5x2
+s.t. x1 ≤ 4
+     2x2 ≤ 12
+     3x1 + 2x2 ≤ 18
+     x1, x2 ≥ 0
+
+三、实验结果
+通过编写的simplex_method函数求解，得到最优解为：
+x1 = 2, x2 = 6, 最优值 z = 36
+
+四、实验总结
+通过本次实验，我深入理解了单纯形法的原理和计算过程，掌握了使用MATLAB实现单纯形法的方法。</pre>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'image':
+                    title.textContent = '算法流程图.png - 预览';
+                    body.innerHTML = `
+                        <img src="https://via.placeholder.com/600x400/4CAF50/FFFFFF?text=算法流程图" alt="算法流程图" class="preview-image">
+                        <p style="text-align: center; margin-top: 10px;">单纯形法算法流程图</p>
+                    `;
+                    break;
+                    
+                case 'pdf':
+                    title.textContent = '最优化方法讲义.pdf - 预览';
+                    body.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-file-pdf" style="font-size: 4rem; color: #f44336;"></i>
+                            <p style="margin-top: 20px;">PDF文档预览需要外部插件支持</p>
+                            <p>您可以选择下载后查看完整文档</p>
+                            <button class="btn btn-download" style="margin-top: 20px;">
+                                <i class="fas fa-download"></i> 下载PDF文档
+                            </button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'word':
+                    title.textContent = '作业要求.docx - 预览';
+                    body.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-file-word" style="font-size: 4rem; color: #2196f3;"></i>
+                            <p style="margin-top: 20px;">Word文档预览需要外部插件支持</p>
+                            <p>您可以选择下载后查看完整文档</p>
+                            <button class="btn btn-download" style="margin-top: 20px;">
+                                <i class="fas fa-download"></i> 下载Word文档
+                            </button>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        function closePreview() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 搜索功能
+        const searchInput = document.querySelector('.search-box input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const fileItems = document.querySelectorAll('.file-item');
+            
+            fileItems.forEach(item => {
+                const fileName = item.querySelector('.file-name').textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
