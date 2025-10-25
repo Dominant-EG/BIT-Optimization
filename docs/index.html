@@ -1,36 +1,669 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>北理最优化方法代码作业</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Description">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub仓库同步下载</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .info-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-section {
+            flex: 2;
+            min-width: 500px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .repo-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .repo-info h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .repo-info p {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .sync-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .sync-controls button {
+            flex: 1;
+        }
+        
+        button {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #0d1a52;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .file-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background 0.2s;
+        }
+        
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .file-icon {
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .file-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .file-size {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-actions button {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .folder {
+            cursor: pointer;
+        }
+        
+        .folder:hover {
+            background: #e9ecef;
+        }
+        
+        .breadcrumb {
+            padding: 15px 20px;
+            background: #e9ecef;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .breadcrumb a {
+            color: #1a2a6c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .repo-stats {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .info-section, .file-section {
+                min-width: 100%;
+            }
+            
+            .repo-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script>
-    window.$docsify = {
-      name: '北理最优化方法代码作业',
-      repo: 'https://github.com/Dominant-EG/BIT-Optimization', // 请修改为你的仓库地址
-      auto2top: true, // 切换页面后是否自动跳转到页面顶部
-      loadSidebar: true, // 启用侧边栏
-      mergeNavbar: true, // 小屏设备上合并导航栏和侧边栏
-      maxLevel: 4, // 侧边栏目录最大层级
-      subMaxLevel: 2,
-      executeScript: true, // 执行脚本，为了渲染MATLAB代码高亮
-    }
-  </script>
-  <!-- Docsify v4 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-  <!-- 代码高亮 -->
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-matlab.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-powershell.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
-  <!-- 搜索插件 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
-  <!-- 图片缩放插件 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/zoom-image.min.js"></script>
+    <div class="container">
+        <header>
+            <h1><i class="fab fa-github"></i> GitHub仓库同步下载</h1>
+            <p class="subtitle">无需登录，直接浏览和下载仓库内容</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="info-section">
+                <div class="repo-info">
+                    <h3><i class="fas fa-info-circle"></i> 仓库信息</h3>
+                    <p><strong>仓库:</strong> <span id="repoFullName">microsoft/vscode</span></p>
+                    <p><strong>描述:</strong> <span id="repoDescription">Visual Studio Code - 开源代码编辑器</span></p>
+                    <p><strong>默认分支:</strong> <span id="repoBranch">main</span></p>
+                    <p><strong>最后更新:</strong> <span id="repoUpdated">--</span></p>
+                    
+                    <div class="repo-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="starsCount">78K</div>
+                            <div class="stat-label">Stars</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="forksCount">12K</div>
+                            <div class="stat-label">Forks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="issuesCount">6K</div>
+                            <div class="stat-label">Issues</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sync-controls">
+                    <button id="startSyncBtn" class="btn-success">
+                        <i class="fas fa-sync-alt"></i> 开始自动同步
+                    </button>
+                    <button id="stopSyncBtn" class="btn-danger">
+                        <i class="fas fa-stop"></i> 停止自动同步
+                    </button>
+                </div>
+                
+                <div id="statusMessage" class="status status-info">
+                    已连接到GitHub仓库，正在加载内容...
+                </div>
+            </div>
+            
+            <div class="file-section">
+                <div class="file-header">
+                    <h2 id="currentPath">仓库文件</h2>
+                    <div id="lastUpdated">最后同步: --</div>
+                </div>
+                
+                <div class="breadcrumb" id="breadcrumb">
+                    <a href="#" class="home-link">根目录</a>
+                </div>
+                
+                <div class="file-list" id="fileList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>正在加载文件列表...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 仓库配置 - 修改这里可以更改默认仓库
+        const REPO_CONFIG = {
+            owner: 'microsoft',
+            name: 'vscode',
+            branch: 'main'
+        };
+        
+        // 全局变量
+        let currentRepo = REPO_CONFIG;
+        let currentPath = '';
+        let refreshIntervalId = null;
+        let autoSyncEnabled = false;
+        
+        // DOM元素
+        const repoFullNameElement = document.getElementById('repoFullName');
+        const repoDescriptionElement = document.getElementById('repoDescription');
+        const repoBranchElement = document.getElementById('repoBranch');
+        const repoUpdatedElement = document.getElementById('repoUpdated');
+        const starsCountElement = document.getElementById('starsCount');
+        const forksCountElement = document.getElementById('forksCount');
+        const issuesCountElement = document.getElementById('issuesCount');
+        const startSyncBtn = document.getElementById('startSyncBtn');
+        const stopSyncBtn = document.getElementById('stopSyncBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const currentPathElement = document.getElementById('currentPath');
+        const lastUpdatedElement = document.getElementById('lastUpdated');
+        const breadcrumbElement = document.getElementById('breadcrumb');
+        const fileListElement = document.getElementById('fileList');
+        
+        // 事件监听
+        startSyncBtn.addEventListener('click', startAutoSync);
+        stopSyncBtn.addEventListener('click', stopAutoSync);
+        
+        // 初始化页面
+        async function initPage() {
+            // 更新仓库信息
+            repoFullNameElement.textContent = `${currentRepo.owner}/${currentRepo.name}`;
+            repoBranchElement.textContent = currentRepo.branch;
+            
+            // 获取仓库详情
+            try {
+                const repoDetails = await fetchRepoDetails();
+                updateRepoInfo(repoDetails);
+            } catch (error) {
+                console.error('获取仓库详情失败:', error);
+                showStatus('获取仓库详情失败，但文件列表仍可加载', 'error');
+            }
+            
+            // 加载文件列表
+            try {
+                await fetchRepoContents(currentPath);
+                showStatus('仓库内容加载成功', 'success');
+                updateLastUpdated();
+            } catch (error) {
+                console.error('加载仓库内容失败:', error);
+                showStatus('加载仓库内容失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 获取仓库详情
+        async function fetchRepoDetails() {
+            const apiUrl = `https://api.github.com/repos/${currentRepo.owner}/${currentRepo.name}`;
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API 错误: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+        
+        // 更新仓库信息
+        function updateRepoInfo(repoDetails) {
+            repoDescriptionElement.textContent = repoDetails.description || '无描述';
+            repoUpdatedElement.textContent = new Date(repoDetails.updated_at).toLocaleString();
+            starsCountElement.textContent = formatNumber(repoDetails.stargazers_count);
+            forksCountElement.textContent = formatNumber(repoDetails.forks_count);
+            issuesCountElement.textContent = formatNumber(repoDetails.open_issues_count);
+        }
+        
+        // 获取仓库内容
+        async function fetchRepoContents(path) {
+            const apiUrl = `https://api.github.com/repos/${currentRepo.owner}/${currentRepo.name}/contents/${path}?ref=${currentRepo.branch}`;
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`GitHub API 错误: ${response.status}`);
+            }
+            
+            const contents = await response.json();
+            
+            // 更新UI
+            updateFileList(contents);
+            updateBreadcrumb(path);
+            currentPathElement.textContent = path ? `路径: ${path}` : '仓库文件';
+        }
+        
+        // 更新文件列表
+        function updateFileList(contents) {
+            fileListElement.innerHTML = '';
+            
+            if (!contents || contents.length === 0) {
+                fileListElement.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <p>此目录为空</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 排序：文件夹在前，文件在后
+            contents.sort((a, b) => {
+                if (a.type === b.type) {
+                    return a.name.localeCompare(b.name);
+                }
+                return a.type === 'dir' ? -1 : 1;
+            });
+            
+            contents.forEach(item => {
+                const fileItem = document.createElement('div');
+                fileItem.className = `file-item ${item.type === 'dir' ? 'folder' : ''}`;
+                
+                const icon = item.type === 'dir' ? 
+                    '<i class="fas fa-folder file-icon" style="color: #ffc107;"></i>' : 
+                    '<i class="fas fa-file file-icon" style="color: #6c757d;"></i>';
+                
+                const size = item.type === 'file' ? 
+                    `<span class="file-size">${formatFileSize(item.size)}</span>` : 
+                    '';
+                
+                const actions = item.type === 'file' ? 
+                    `<div class="file-actions">
+                        <button class="btn-download" data-url="${item.download_url}">
+                            <i class="fas fa-download"></i> 下载
+                        </button>
+                    </div>` : 
+                    '';
+                
+                fileItem.innerHTML = `
+                    ${icon}
+                    <span class="file-name">${item.name}</span>
+                    ${size}
+                    ${actions}
+                `;
+                
+                if (item.type === 'dir') {
+                    fileItem.addEventListener('click', () => {
+                        navigateToFolder(item.path);
+                    });
+                }
+                
+                fileListElement.appendChild(fileItem);
+            });
+            
+            // 添加下载按钮事件监听
+            document.querySelectorAll('.btn-download').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const downloadUrl = button.getAttribute('data-url');
+                    downloadFile(downloadUrl);
+                });
+            });
+        }
+        
+        // 导航到文件夹
+        function navigateToFolder(path) {
+            currentPath = path;
+            fetchRepoContents(path);
+        }
+        
+        // 更新面包屑导航
+        function updateBreadcrumb(path) {
+            breadcrumbElement.innerHTML = '<a href="#" class="home-link">根目录</a>';
+            
+            if (!path) return;
+            
+            const pathParts = path.split('/');
+            let currentPath = '';
+            
+            pathParts.forEach((part, index) => {
+                currentPath += (currentPath ? '/' : '') + part;
+                const isLast = index === pathParts.length - 1;
+                
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = part;
+                if (!isLast) {
+                    link.addEventListener('click', () => {
+                        navigateToFolder(currentPath);
+                    });
+                } else {
+                    link.style.color = '#6c757d';
+                    link.style.pointerEvents = 'none';
+                }
+                
+                breadcrumbElement.appendChild(document.createTextNode(' / '));
+                breadcrumbElement.appendChild(link);
+            });
+            
+            // 添加根目录点击事件
+            document.querySelector('.home-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateToFolder('');
+            });
+        }
+        
+        // 下载文件
+        function downloadFile(url) {
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                showStatus('此文件无法直接下载', 'error');
+            }
+        }
+        
+        // 开始自动同步
+        function startAutoSync() {
+            autoSyncEnabled = true;
+            showStatus(`已开启自动同步，每5分钟刷新一次`, 'success');
+            
+            // 清除现有定时器
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+            }
+            
+            // 设置新定时器
+            refreshIntervalId = setInterval(() => {
+                if (autoSyncEnabled) {
+                    fetchRepoContents(currentPath)
+                        .then(() => {
+                            updateLastUpdated();
+                            showStatus(`自动同步完成 - ${new Date().toLocaleTimeString()}`, 'info');
+                        })
+                        .catch(error => {
+                            showStatus(`自动同步失败: ${error.message}`, 'error');
+                        });
+                }
+            }, 5 * 60 * 1000); // 5分钟
+        }
+        
+        // 停止自动同步
+        function stopAutoSync() {
+            autoSyncEnabled = false;
+            
+            if (refreshIntervalId) {
+                clearInterval(refreshIntervalId);
+                refreshIntervalId = null;
+            }
+            
+            showStatus('自动同步已停止', 'info');
+        }
+        
+        // 更新最后更新时间
+        function updateLastUpdated() {
+            lastUpdatedElement.textContent = `最后同步: ${new Date().toLocaleTimeString()}`;
+        }
+        
+        // 显示状态消息
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status';
+            
+            switch (type) {
+                case 'success':
+                    statusMessage.classList.add('status-success');
+                    break;
+                case 'error':
+                    statusMessage.classList.add('status-error');
+                    break;
+                case 'info':
+                    statusMessage.classList.add('status-info');
+                    break;
+            }
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 格式化数字（添加千分位）
+        function formatNumber(num) {
+            if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
 </body>
 </html>
