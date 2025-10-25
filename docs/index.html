@@ -283,6 +283,15 @@
             color: #6c757d;
         }
         
+        .download-all {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .download-all button {
+            width: 100%;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -309,25 +318,31 @@
             <div class="info-section">
                 <div class="repo-info">
                     <h3><i class="fas fa-info-circle"></i> 仓库信息</h3>
-                    <p><strong>仓库:</strong> <span id="repoFullName">microsoft/vscode</span></p>
-                    <p><strong>描述:</strong> <span id="repoDescription">Visual Studio Code - 开源代码编辑器</span></p>
-                    <p><strong>默认分支:</strong> <span id="repoBranch">main</span></p>
+                    <p><strong>仓库:</strong> <span id="repoFullName">正在检测...</span></p>
+                    <p><strong>描述:</strong> <span id="repoDescription">--</span></p>
+                    <p><strong>默认分支:</strong> <span id="repoBranch">--</span></p>
                     <p><strong>最后更新:</strong> <span id="repoUpdated">--</span></p>
                     
                     <div class="repo-stats">
                         <div class="stat">
-                            <div class="stat-value" id="starsCount">78K</div>
-                            <div class="stat-label">Stars</div>
+                            <div class="stat-value" id="filesCount">--</div>
+                            <div class="stat-label">文件</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value" id="forksCount">12K</div>
-                            <div class="stat-label">Forks</div>
+                            <div class="stat-value" id="foldersCount">--</div>
+                            <div class="stat-label">文件夹</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value" id="issuesCount">6K</div>
-                            <div class="stat-label">Issues</div>
+                            <div class="stat-value" id="totalSize">--</div>
+                            <div class="stat-label">总大小</div>
                         </div>
                     </div>
+                </div>
+                
+                <div class="download-all">
+                    <button id="downloadZipBtn" class="btn-success">
+                        <i class="fas fa-file-archive"></i> 下载整个仓库 (ZIP)
+                    </button>
                 </div>
                 
                 <div class="sync-controls">
@@ -340,7 +355,7 @@
                 </div>
                 
                 <div id="statusMessage" class="status status-info">
-                    已连接到GitHub仓库，正在加载内容...
+                    正在检测当前仓库信息...
                 </div>
             </div>
             
@@ -357,7 +372,7 @@
                 <div class="file-list" id="fileList">
                     <div class="loading">
                         <i class="fas fa-spinner fa-spin"></i>
-                        <p>正在加载文件列表...</p>
+                        <p>正在检测仓库信息...</p>
                     </div>
                 </div>
             </div>
@@ -365,29 +380,46 @@
     </div>
 
     <script>
-        // 仓库配置 - 修改这里可以更改默认仓库
-        const REPO_CONFIG = {
-            owner: 'microsoft',
-            name: 'vscode',
-            branch: 'main'
-        };
+        // 自动检测当前仓库信息
+        function detectCurrentRepo() {
+            // 从当前URL提取仓库信息
+            const url = window.location.href;
+            const githubMatch = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+            
+            if (githubMatch) {
+                return {
+                    owner: githubMatch[1],
+                    name: githubMatch[2],
+                    branch: 'main' // 默认分支
+                };
+            }
+            
+            // 如果不是GitHub页面，使用示例仓库
+            return {
+                owner: 'microsoft',
+                name: 'vscode',
+                branch: 'main'
+            };
+        }
         
         // 全局变量
-        let currentRepo = REPO_CONFIG;
+        let currentRepo = detectCurrentRepo();
         let currentPath = '';
         let refreshIntervalId = null;
         let autoSyncEnabled = false;
+        let repoDetails = null;
         
         // DOM元素
         const repoFullNameElement = document.getElementById('repoFullName');
         const repoDescriptionElement = document.getElementById('repoDescription');
         const repoBranchElement = document.getElementById('repoBranch');
         const repoUpdatedElement = document.getElementById('repoUpdated');
-        const starsCountElement = document.getElementById('starsCount');
-        const forksCountElement = document.getElementById('forksCount');
-        const issuesCountElement = document.getElementById('issuesCount');
+        const filesCountElement = document.getElementById('filesCount');
+        const foldersCountElement = document.getElementById('foldersCount');
+        const totalSizeElement = document.getElementById('totalSize');
         const startSyncBtn = document.getElementById('startSyncBtn');
         const stopSyncBtn = document.getElementById('stopSyncBtn');
+        const downloadZipBtn = document.getElementById('downloadZipBtn');
         const statusMessage = document.getElementById('statusMessage');
         const currentPathElement = document.getElementById('currentPath');
         const lastUpdatedElement = document.getElementById('lastUpdated');
@@ -397,6 +429,7 @@
         // 事件监听
         startSyncBtn.addEventListener('click', startAutoSync);
         stopSyncBtn.addEventListener('click', stopAutoSync);
+        downloadZipBtn.addEventListener('click', downloadRepoZip);
         
         // 初始化页面
         async function initPage() {
@@ -406,8 +439,9 @@
             
             // 获取仓库详情
             try {
-                const repoDetails = await fetchRepoDetails();
+                repoDetails = await fetchRepoDetails();
                 updateRepoInfo(repoDetails);
+                showStatus('仓库信息加载成功', 'success');
             } catch (error) {
                 console.error('获取仓库详情失败:', error);
                 showStatus('获取仓库详情失败，但文件列表仍可加载', 'error');
@@ -416,7 +450,6 @@
             // 加载文件列表
             try {
                 await fetchRepoContents(currentPath);
-                showStatus('仓库内容加载成功', 'success');
                 updateLastUpdated();
             } catch (error) {
                 console.error('加载仓库内容失败:', error);
@@ -438,12 +471,14 @@
         }
         
         // 更新仓库信息
-        function updateRepoInfo(repoDetails) {
-            repoDescriptionElement.textContent = repoDetails.description || '无描述';
-            repoUpdatedElement.textContent = new Date(repoDetails.updated_at).toLocaleString();
-            starsCountElement.textContent = formatNumber(repoDetails.stargazers_count);
-            forksCountElement.textContent = formatNumber(repoDetails.forks_count);
-            issuesCountElement.textContent = formatNumber(repoDetails.open_issues_count);
+        function updateRepoInfo(details) {
+            repoDescriptionElement.textContent = details.description || '无描述';
+            repoUpdatedElement.textContent = new Date(details.updated_at).toLocaleString();
+            repoBranchElement.textContent = details.default_branch;
+            currentRepo.branch = details.default_branch;
+            
+            // 更新下载ZIP的URL
+            downloadZipBtn.setAttribute('data-url', details.html_url + '/archive/refs/heads/' + details.default_branch + '.zip');
         }
         
         // 获取仓库内容
@@ -462,6 +497,9 @@
             updateFileList(contents);
             updateBreadcrumb(path);
             currentPathElement.textContent = path ? `路径: ${path}` : '仓库文件';
+            
+            // 更新统计信息
+            updateStats(contents);
         }
         
         // 更新文件列表
@@ -574,13 +612,40 @@
             });
         }
         
-        // 下载文件
+        // 下载单个文件
         function downloadFile(url) {
             if (url) {
                 window.open(url, '_blank');
             } else {
                 showStatus('此文件无法直接下载', 'error');
             }
+        }
+        
+        // 下载整个仓库ZIP
+        function downloadRepoZip() {
+            const zipUrl = `https://github.com/${currentRepo.owner}/${currentRepo.name}/archive/refs/heads/${currentRepo.branch}.zip`;
+            window.open(zipUrl, '_blank');
+            showStatus('开始下载仓库ZIP文件', 'success');
+        }
+        
+        // 更新统计信息
+        function updateStats(contents) {
+            let fileCount = 0;
+            let folderCount = 0;
+            let totalSize = 0;
+            
+            contents.forEach(item => {
+                if (item.type === 'file') {
+                    fileCount++;
+                    totalSize += item.size;
+                } else if (item.type === 'dir') {
+                    folderCount++;
+                }
+            });
+            
+            filesCountElement.textContent = fileCount;
+            foldersCountElement.textContent = folderCount;
+            totalSizeElement.textContent = formatFileSize(totalSize);
         }
         
         // 开始自动同步
@@ -652,14 +717,6 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-        
-        // 格式化数字（添加千分位）
-        function formatNumber(num) {
-            if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
         }
         
         // 页面加载完成后初始化
